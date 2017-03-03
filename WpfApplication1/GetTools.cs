@@ -23,53 +23,48 @@ namespace WpfApplication1
             }
             return newfile;
         }
-        static public string getjsonVersion(string filename)
+
+        static public Version getjsonVersion(string filename)
         {
-            string lines = "";
+            
             Version ver = new Version();
             int count = 0;
-            foreach (string line in File.ReadLines(filename, Encoding.UTF8))
+            ver.setType("Parent");
+            foreach (string line in File.ReadLines(filename + "\\manifest.json", Encoding.UTF8))
             {
-                if (line.Contains("Version:") && count < 2)
+                if (line.Contains("version") && count < 2)
                 {
                     line.TrimStart(' ');
-                    lines = (line.Substring(12,7));
+                    ver.setVersion(line.Substring(13, 7));
+
                     count++;
                 }
+                else count++;
             }
 
 
-            return lines;
+            return ver;
         }
-        static public List<Version> getDepVersion(string filename)
+        static public Version getDepVersion(string filename)
         {
-            List<Version> lines = new List<Version>();
             Version ver = new Version();
-            int count = 0;
+            string newfile = getFileEnd(filename);
             string temp;
-            foreach (string line in File.ReadLines(filename, Encoding.UTF8))
+            ver.setName(filename);
+            foreach (string line in File.ReadLines(filename + "\\properties\\AssemblyInfo.cs", Encoding.UTF8))
             {
-                if (line.Contains("Project:"))
-                {
-                     
-                    line.TrimStart(' ');
-                    temp = line.Substring(12);
-                    temp = temp.TrimEnd('\"');
-                    ver.setName(temp);
                     
-                }
-                else if (line.Contains("Version:") && count > 2)
+                if (line.Contains("[assembly: AssemblyVersion(\"1.0.0.0\")]"))
                 {
                     line.TrimStart(' ');
-                    temp = line.Substring(12, 7);
+                    temp = line.Substring(27, 7);
                     ver.setVersion(temp);
-                    count++;
+
                 }
-                lines.Add(ver);
             }
 
 
-            return lines;
+            return ver;
         }
 
         static public List<string> GetDependencies(string filename)

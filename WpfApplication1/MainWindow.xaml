@@ -17,13 +17,16 @@
         <DockPanel Margin="10">
             
             <StackPanel DockPanel.Dock="Right" Margin="10,120,0,0.5">
+
                 
                 <Button Name="btnTest" Click="btnTest_Click">Get Dependencies</Button>
                 <Button Name="btnTest2" Click="btnTest2_Click">Get Children</Button>
-                
+                <TextBlock Text="Version"></TextBlock>
+                <Label Loaded="verdisp"></Label>
             </StackPanel>
             
-            <ListBox Name="lbUsers" DisplayMemberPath="Name" Margin="0,120,0,0.5"></ListBox>
+            <ListBox Name="lbUsers" DisplayMemberPath="Name" Margin="0,120,0,42.5" Width="396"></ListBox>
+            <Button Name="majorBump" Click="btnmajorBump" Margin="-650,265,0,14.5" Width="76">Major Bump</Button>
         </DockPanel>
         
     </Grid>

@@ -26,8 +26,10 @@ namespace WpfApplication1
     {
         private ObservableCollection<User> users = new ObservableCollection<User>();
         private ObservableCollection<User> myproj = new ObservableCollection<User>();
+        private ObservableCollection<Version> vers = new ObservableCollection<Version>();
         string selected;
         string file_selected;
+        Version help;
         public MainWindow()
         {
             InitializeComponent();
@@ -79,6 +81,7 @@ namespace WpfApplication1
             
                 
             List<string> temp = GetTools.GetDirectories(selected);
+            myproj.Clear();
             foreach (string thing in temp)
             {
                 myproj.Add(new User() { Name = thing });
@@ -87,6 +90,28 @@ namespace WpfApplication1
             Console.WriteLine(selected);
                             
             
+        }
+        private void btnmajorBump(object sender, RoutedEventArgs e)
+        {
+            help = GetTools.getjsonVersion((Projects.SelectedItem as User).Name);
+            help.toArray();
+            help.bumpMajor();
+            help.toString();
+            
+            
+        }
+        private void verdisp(object sender, RoutedEventArgs e)
+        {
+            User temp = new User();
+            // ... Get label.
+            try { temp = new User { Name = help.getVersion() }; }
+            catch (NullReferenceException l) {
+                Console.WriteLine(l);
+            }
+
+            var label = sender as System.Windows.Controls.Label;
+                // ... Set date in content.
+                label.Content = temp.Name;
         }
         public class User : INotifyPropertyChanged
         {
@@ -110,6 +135,35 @@ namespace WpfApplication1
             {
                 if (this.PropertyChanged != null)
                     this.PropertyChanged(this, new PropertyChangedEventArgs(propName));
+            }
+        }
+        public partial class EntitiesView : System.Windows.Controls.UserControl, INotifyPropertyChanged
+        {
+            private string _name2;
+            public string Name2
+            {
+                get { return _name2; }
+                set
+                {
+                    _name2 = value;
+                    RaisePropertyChanged("Name2");
+                }
+            }
+
+            public EntitiesView()
+            {
+                Name2 = "abcdef";
+                DataContext = this;
+                }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+            protected void RaisePropertyChanged(string propertyName)
+            {
+                var handler = PropertyChanged;
+                if (handler != null)
+                {
+                    handler(this, new PropertyChangedEventArgs(propertyName));
+                }
             }
         }
     }

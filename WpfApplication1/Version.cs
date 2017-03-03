@@ -16,7 +16,7 @@ namespace WpfApplication1
         {
             type = "";
             name = "";
-            version = new int[3];
+            version = new int[4];
             verString = new char[7];
         }
         public Version(int[] array)
@@ -37,6 +37,10 @@ namespace WpfApplication1
             return type; }
         public string getName() {
             return name; }
+        public string getVersion()
+        {
+            return verString.ToString();
+        }
         public void setType(string newtype)
         { type = newtype; }
 
@@ -64,19 +68,20 @@ namespace WpfApplication1
         {
             version[3] += 1;
         }
-        public char[] toString()
+        public string toString()
         {
             int count = 0;
             foreach (int num in version)
             {
-                if (count < 7)
+                if (count < 6)
                 {
                     verString[count] = ((char)num);
                     verString[count + 1] = '.';
+                    count += 2;
                 }
                 else verString[count] = ((char)num);
             }
-            return verString;
+            return verString.ToString();
         }
         public int[] toArray()
         {
