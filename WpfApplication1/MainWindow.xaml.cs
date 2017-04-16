@@ -91,14 +91,24 @@ namespace WpfApplication1
                             
             
         }
-        private void btnmajorBump(object sender, RoutedEventArgs e)
+        private void depverBump(object sender, RoutedEventArgs e)
         {
-            help = GetTools.getjsonVersion((Projects.SelectedItem as User).Name);
+            string test = (Projects.SelectedItem as User).Name + "\\" + (lbUsers.SelectedItem as User).Name;
+            help = GetTools.getchildVersion(test);
             help.toArray();
             help.bumpMajor();
             help.toString();
             
             
+        }
+        private void jsonverBump(object sender, RoutedEventArgs e)
+        {
+            help = GetTools.getjsonVersion((Projects.SelectedItem as User).Name);
+            help.toArray();
+            help.bumpMajor();
+            help.toString();
+
+
         }
         private void verdisp(object sender, RoutedEventArgs e)
         {

@@ -10,23 +10,23 @@ namespace WpfApplication1
         private string type;
         private string name;
         private int[] version;
-        private char[] verString;
+        private string verString;
 
         public Version()
         {
             type = "";
             name = "";
             version = new int[4];
-            verString = new char[7];
+
         }
         public Version(int[] array)
         {
             type = "";
             name = "";
             version = array;
-            verString = new char [7];
+
         }
-        public Version(int[] version2,string type2, string name2,char[]verString2)
+        public Version(int[] version2, string type2, string name2, string verString2)
         {
             type = type2;
             name = name2;
@@ -48,13 +48,13 @@ namespace WpfApplication1
         { name = newname; }
         public void setVersion(string ver)
         {
-            char[] charVer = ver.ToCharArray();
-            verString= charVer;
+            string charVer = ver;
+            verString = charVer;
 
         }
         public void bumpRewrite()
         {
-             version[0] += 1;
+            version[0] += 1;
         }
         public void bumpMajor()
         {
@@ -70,18 +70,17 @@ namespace WpfApplication1
         }
         public string toString()
         {
-            int count = 0;
+            string temp = "";
             foreach (int num in version)
             {
-                if (count < 6)
-                {
-                    verString[count] = ((char)num);
-                    verString[count + 1] = '.';
-                    count += 2;
-                }
-                else verString[count] = ((char)num);
+                object o = new object();
+                o = num;
+                temp = temp + num + '.';
             }
-            return verString.ToString();
+                
+                
+        
+            return temp;
         }
         public int[] toArray()
         {

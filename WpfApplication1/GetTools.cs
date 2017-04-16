@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace WpfApplication1
 {
@@ -30,14 +31,20 @@ namespace WpfApplication1
             Version ver = new Version();
             int count = 0;
             ver.setType("Parent");
+            string temp = "";
+            string pattern = "[:][' ']\"[^\"]+\"";
             foreach (string line in File.ReadLines(filename + "\\manifest.json", Encoding.UTF8))
             {
-                if (line.Contains("version") && count < 2)
+                
+                if (line.Contains("version") && count <2)
                 {
-                    line.TrimStart(' ');
-                    ver.setVersion(line.Substring(13, 7));
-
-                    count++;
+                    var match = Regex.Match(line, pattern);
+                    temp =(match.Value);
+                    temp = temp.Substring(3);
+                    temp = temp.TrimEnd('\"');
+                    ver.setVersion(temp);
+                    return ver;
+                    
                 }
                 else count++;
             }
@@ -45,20 +52,25 @@ namespace WpfApplication1
 
             return ver;
         }
-        static public Version getDepVersion(string filename)
+        static public Version getchildVersion(string filename)
         {
             Version ver = new Version();
-            string newfile = getFileEnd(filename);
-            string temp;
+
+            string temp = "";
+            string pattern = "\"[^\"]+\"";
             ver.setName(filename);
             foreach (string line in File.ReadLines(filename + "\\properties\\AssemblyInfo.cs", Encoding.UTF8))
             {
                     
                 if (line.Contains("[assembly: AssemblyVersion(\"1.0.0.0\")]"))
                 {
-                    line.TrimStart(' ');
-                    temp = line.Substring(27, 7);
+                    var match = Regex.Match(line, pattern);
+                    temp = (match.Value);
+                    temp = temp.Substring(1);
+                    temp = temp.TrimEnd('\"');
                     ver.setVersion(temp);
+                    
+                    return ver;
 
                 }
             }
@@ -66,7 +78,6 @@ namespace WpfApplication1
 
             return ver;
         }
-
         static public List<string> GetDependencies(string filename)
         {
             List<string> depen = new List<string>();
@@ -106,14 +117,40 @@ namespace WpfApplication1
                     }
                 }
             }
-            catch(ArgumentNullException help)
+            catch (Exception ex)
             {
-                Console.WriteLine(help);
+                if (ex is ArgumentNullException || ex is FileNotFoundException)
+                {
+                    Console.WriteLine("There was a slight issue");
+                }
             }
             return depen2;
         }
-
-        static public List<string> GetChildren(string filename)
+        static public List<string> GetChildrenPath(string filename)
+        {
+            string newfile = getFileEnd(filename);
+            List<string> depen = new List<string>();
+            try
+            {
+                foreach (string line in File.ReadLines(newfile, Encoding.UTF8))
+                {
+                    if (!line.Contains("\"..\\") && line.Contains(".csproj"))
+                    {
+                        depen.Add(line);
+                    }
+                }
+      
+            }
+            catch (Exception ex)
+            {
+                if (ex is ArgumentNullException || ex is FileNotFoundException)
+                {
+                    Console.WriteLine("There was a slight issue");
+                }
+            }
+            return depen;
+        }
+                static public List<string> GetChildren(string filename)
         {
             string newfile = getFileEnd(filename);
             List<string> depen = new List<string>();
@@ -143,9 +180,12 @@ namespace WpfApplication1
                     }
                 }
             }
-            catch(ArgumentNullException help)
+            catch (Exception ex)
             {
-                Console.WriteLine(help);
+                if (ex is ArgumentNullException || ex is FileNotFoundException)
+                {
+                    Console.WriteLine("There was a slight issue");
+                }
             }
             return depen2;
         }
@@ -176,6 +216,13 @@ namespace WpfApplication1
 
 
         }
+        static public bool verify(string filename) {
+            Version first = getjsonVersion(filename);
+            Version second = getchildVersion(filename);
+
+            return true;
+        }
     }
+
 }
 

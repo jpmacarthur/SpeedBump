@@ -26,7 +26,8 @@
             </StackPanel>
             
             <ListBox Name="lbUsers" DisplayMemberPath="Name" Margin="0,120,0,42.5" Width="396"></ListBox>
-            <Button Name="majorBump" Click="btnmajorBump" Margin="-650,265,0,14.5" Width="76">Major Bump</Button>
+            <Button Name="depver" Click="depverBump" Margin="-650,265,0,14.5" Width="76">Dep Ver</Button>
+            <Button Name="jsonver" Click="jsonverBump" Margin="-450,265,0,14.5" Width="76">JSON</Button>
         </DockPanel>
         
     </Grid>
