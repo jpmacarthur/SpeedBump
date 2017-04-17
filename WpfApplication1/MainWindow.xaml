@@ -29,6 +29,7 @@
             <Button Name="depver" Click="depverBump" Margin="-650,265,0,14.5" Width="76">Dep Ver</Button>
             <Button Name="jsonver" Click="jsonverBump" Margin="-450,265,0,14.5" Width="76">JSON</Button>
             <Button Name="allkids" Click="allkidsBump" Margin="-250,265,0,14.5" Width="76">All Kids</Button>
+            <Button Name="bmptest" Click="bmptestBump" Margin="-70,265,0,14.5" Width="76">Bump Test</Button>
         </DockPanel>
         
     </Grid>

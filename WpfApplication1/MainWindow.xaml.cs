@@ -121,6 +121,16 @@ namespace WpfApplication1
 
 
         }
+        private void bmptestBump(object sender, RoutedEventArgs e)
+        {
+            help = GetTools.getjsonVersion((Projects.SelectedItem as User).Name);
+            help.toArray();
+            help.bumpTrivial();
+            help.toString();
+            help2 = GetTools.getAllChildrenVersions((Projects.SelectedItem as User).Name);
+
+
+        }
         private void verdisp(object sender, RoutedEventArgs e)
         {
             User temp = new User();

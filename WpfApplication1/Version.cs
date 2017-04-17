@@ -55,18 +55,28 @@ namespace WpfApplication1
         public void bumpRewrite()
         {
             version[0] += 1;
+            version[1] = 0;
+            version[2] = 0;
+            version[3] = 0;
+            verString = toString();
         }
         public void bumpMajor()
         {
             version[1] += 1;
+            version[2] = 0;
+            version[3] = 0;
+            verString = toString();
         }
         public void bumpMinor()
         {
             version[2] += 1;
+            version[3] = 0;
+            verString = toString();
         }
         public void bumpTrivial()
         {
             version[3] += 1;
+            verString = toString();
         }
         public string toString()
         {
@@ -77,21 +87,19 @@ namespace WpfApplication1
                 o = num;
                 temp = temp + num + '.';
             }
-                
+            temp = temp.TrimEnd('.');
+            verString = temp;
                 
         
             return temp;
         }
         public int[] toArray()
         {
-            int count = 0;
-            for(int i=0; i < 8; i=i + 2, count++)
-            {
-                if (verString[i] != '.')
-                {
-                    version[count] = verString[i];
-                }
-            }
+            char[] delimiter = { '.' };
+            string ver = getVersion();
+            string[] nums = ver.Split(delimiter);
+            int[] nums2 = Array.ConvertAll<string, int>(nums,int.Parse);
+            version = nums2;
             return version;
         }
     }
