@@ -30,6 +30,7 @@ namespace WpfApplication1
         string selected;
         string file_selected;
         Version help;
+        Dictionary<string, string> help2;
         public MainWindow()
         {
             InitializeComponent();
@@ -100,6 +101,16 @@ namespace WpfApplication1
             help.toString();
             
             
+        }
+        private void allkidsBump(object sender, RoutedEventArgs e)
+        {
+            string test = (Projects.SelectedItem as User).Name;
+            help2 = GetTools.getAllChildrenVersions(test);
+            bool verif;
+            verif = GetTools.verify((Projects.SelectedItem as User).Name);
+
+
+
         }
         private void jsonverBump(object sender, RoutedEventArgs e)
         {

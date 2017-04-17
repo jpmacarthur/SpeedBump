@@ -39,7 +39,7 @@ namespace WpfApplication1
             return name; }
         public string getVersion()
         {
-            return verString.ToString();
+            return verString;
         }
         public void setType(string newtype)
         { type = newtype; }

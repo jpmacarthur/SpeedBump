@@ -55,7 +55,7 @@ namespace WpfApplication1
         static public Version getchildVersion(string filename)
         {
             Version ver = new Version();
-
+            ver.setType("Child");
             string temp = "";
             string pattern = "\"[^\"]+\"";
             ver.setName(filename);
@@ -217,12 +217,33 @@ namespace WpfApplication1
 
         }
         static public bool verify(string filename) {
-            Version first = getjsonVersion(filename);
-            Version second = getchildVersion(filename);
+            bool matches = true;
+            Version json = getjsonVersion(filename);
+            Exception MismatchedVersion = new Exception();
+            Dictionary<string, string> kids = getAllChildrenVersions(filename);
 
-            return true;
+            foreach(KeyValuePair<string, string> entry in kids)
+            {
+                if (entry.Value != json.getVersion()) throw MismatchedVersion; matches = false;
+            }
+
+            return matches;
         }
+    
+    static public Dictionary<string, string> getAllChildrenVersions(string filename)
+    {
+            Dictionary<string, string> kids = new Dictionary<string, string>();
+            List<string> files = GetDirectories(filename);
+            foreach(string child in files)
+            {
+                Version little = getchildVersion(child);
+                kids.Add(little.getName(), little.getVersion());
+
+            }
+
+        return kids;
     }
+}
 
 }
 
