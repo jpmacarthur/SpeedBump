@@ -44,6 +44,7 @@ namespace WpfApplication1
                     temp = temp.Substring(3);
                     temp = temp.TrimEnd('\"');
                     ver.setVersion(temp);
+                    ver.setName(filename);
                     return ver;
                     
                 }
@@ -59,13 +60,13 @@ namespace WpfApplication1
             ver.setType("Child");
             string temp = "";
             string pattern = "\"[^\"]+\"";
-            ver.setName(filename);
             foreach (string line in File.ReadLines(filename + "\\properties\\AssemblyInfo.cs", Encoding.UTF8))
             {
 
                 if (line.Contains("[assembly: AssemblyVersion(") && !line.Contains("//"))
                 {
                     ver = new Version();
+                    ver.setName(filename);
                     var match = Regex.Match(line, pattern);
                     temp = (match.Value);
                     temp = temp.Substring(1);
@@ -324,6 +325,52 @@ namespace WpfApplication1
                 
             }
             return worked;
+        }
+        static public bool writejsonVersion(Version file)
+        {
+            bool worked = false;
+            string pattern = "[:][' ']\"[^\"]+\"";
+            int count = 0;
+            string[] temp = File.ReadAllLines(file.getName() + "\\manifest.json");
+            foreach (string thing in temp)
+                {
+                    if (thing.Contains("version") && count < 2)
+                    {
+                        temp[count] = Regex.Replace(thing, pattern, ": \"" + file.getVersion() + '"');
+                    worked = true;
+                        break;
+                    }
+                    count++;
+                }
+
+                File.WriteAllLines(file.getName() + "\\manifest.json", temp);
+            return worked;
+            }
+           
+        static public string lastdirect()
+        {
+            string temp = "";
+            string location = "C:\\Users\\Pat\\Desktop\\location.txt";
+
+
+            if (File.Exists(location)){
+                using (StreamReader file = new StreamReader(location)) 
+                {
+                    char[] badchar = { '\r', '\n' };
+                    temp = file.ReadToEnd();
+                    temp = temp.TrimEnd(badchar);
+                    return temp; }
+            }
+
+
+            return temp;
+        }
+    static public void writeDirec(string filename)
+        {
+            using (StreamWriter file = new StreamWriter("C:\\Users\\Pat\\Desktop\\location.txt"))
+            {
+                file.WriteLine(filename);
+            }
         }
     }
 

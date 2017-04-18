@@ -34,8 +34,19 @@ namespace WpfApplication1
         public MainWindow()
         {
             InitializeComponent();
+            if (GetTools.lastdirect() != "")
+            {
+                List<string> temp = GetTools.GetDirectories(GetTools.lastdirect());
+                myproj.Clear();
+                foreach (string thing in temp)
+                {
+                    myproj.Add(new User() { Name = thing });
+                    Console.WriteLine(thing);
+                }
+            }
             lbUsers.ItemsSource = users;
             Projects.ItemsSource = myproj;
+
         }
         private void btnTest_Click(object sender, RoutedEventArgs e)
         {
@@ -88,6 +99,7 @@ namespace WpfApplication1
                 myproj.Add(new User() { Name = thing });
                 Console.WriteLine(thing);
             }
+            GetTools.writeDirec(selected);
             Console.WriteLine(selected);
                             
             
@@ -118,6 +130,7 @@ namespace WpfApplication1
             help.toArray();
             help.bumpMajor();
             help.toString();
+            GetTools.writejsonVersion(help);
 
 
         }
