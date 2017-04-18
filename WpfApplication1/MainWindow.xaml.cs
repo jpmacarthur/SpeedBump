@@ -127,7 +127,8 @@ namespace WpfApplication1
             help.toArray();
             help.bumpTrivial();
             help.toString();
-            help2 = GetTools.getAllChildrenVersions((Projects.SelectedItem as User).Name);
+            help2 = GetTools.bumpChildrenTrivial((Projects.SelectedItem as User).Name);
+            GetTools.writechildVersion(help2);
 
 
         }

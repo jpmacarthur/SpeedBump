@@ -38,6 +38,7 @@ namespace WpfApplication1
                 
                 if (line.Contains("version") && count <2)
                 {
+                    ver = new Version();
                     var match = Regex.Match(line, pattern);
                     temp =(match.Value);
                     temp = temp.Substring(3);
@@ -61,9 +62,10 @@ namespace WpfApplication1
             ver.setName(filename);
             foreach (string line in File.ReadLines(filename + "\\properties\\AssemblyInfo.cs", Encoding.UTF8))
             {
-                    
-                if (line.Contains("[assembly: AssemblyVersion(\"1.0.0.0\")]"))
+
+                if (line.Contains("[assembly: AssemblyVersion(") && !line.Contains("//"))
                 {
+                    ver = new Version();
                     var match = Regex.Match(line, pattern);
                     temp = (match.Value);
                     temp = temp.Substring(1);
@@ -150,7 +152,7 @@ namespace WpfApplication1
             }
             return depen;
         }
-                static public List<string> GetChildren(string filename)
+        static public List<string> GetChildren(string filename)
         {
             string newfile = getFileEnd(filename);
             List<string> depen = new List<string>();
@@ -243,7 +245,87 @@ namespace WpfApplication1
 
         return kids;
     }
-}
+
+    static public Dictionary<string, string> bumpChildrenTrivial(string filename)
+    {
+        Dictionary<string, string> kids = new Dictionary<string, string>();
+        List<string> files = GetDirectories(filename);
+        foreach (string child in files)
+        {
+            Version little = getchildVersion(child);
+            little.bumpTrivial();
+            kids.Add(little.getName(), little.getVersion());
+
+        }
+
+        return kids;
+    }
+     static public Dictionary<string, string> bumpChildrenMinor(string filename)
+        {
+            Dictionary<string, string> kids = new Dictionary<string, string>();
+            List<string> files = GetDirectories(filename);
+            foreach (string child in files)
+            {
+                Version little = getchildVersion(child);
+                little.bumpMinor();
+                kids.Add(little.getName(), little.getVersion());
+
+            }
+
+            return kids;
+        }
+     static public Dictionary<string, string> bumpChildrenMajor(string filename)
+        {
+            Dictionary<string, string> kids = new Dictionary<string, string>();
+            List<string> files = GetDirectories(filename);
+            foreach (string child in files)
+            {
+                Version little = getchildVersion(child);
+                little.bumpMajor();
+                kids.Add(little.getName(), little.getVersion());
+
+            }
+
+            return kids;
+        }
+     static public Dictionary<string, string> bumpChildrenRewrite(string filename)
+        {
+            Dictionary<string, string> kids = new Dictionary<string, string>();
+            List<string> files = GetDirectories(filename);
+            foreach (string child in files)
+            {
+                Version little = getchildVersion(child);
+                little.bumpRewrite();
+                kids.Add(little.getName(), little.getVersion());
+
+            }
+
+            return kids;
+        }
+      static public bool writechildVersion(Dictionary<string, string> files)
+        {
+            bool worked = false;
+            string pattern = "\"[^\"]+\"";
+            int count = 0;
+            foreach (KeyValuePair<string, string> pair in files)
+            {
+                string[] temp = File.ReadAllLines(pair.Key + "\\properties\\AssemblyInfo.cs");
+                foreach (string thing in temp)
+                {
+                    if (thing.Contains("[assembly: AssemblyVersion(") && !thing.Contains("//"))
+                    {temp[count] = Regex.Replace(thing, pattern, '"' + pair.Value + '"');
+                    count = 0;
+                    break;
+                    }
+                    count++;
+                }
+                
+                File.WriteAllLines(pair.Key + "\\properties\\AssemblyInfo.cs", temp);
+                
+            }
+            return worked;
+        }
+    }
 
 }
 

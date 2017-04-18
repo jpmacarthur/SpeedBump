@@ -54,6 +54,7 @@ namespace WpfApplication1
         }
         public void bumpRewrite()
         {
+            toArray();
             version[0] += 1;
             version[1] = 0;
             version[2] = 0;
@@ -62,6 +63,7 @@ namespace WpfApplication1
         }
         public void bumpMajor()
         {
+            toArray();
             version[1] += 1;
             version[2] = 0;
             version[3] = 0;
@@ -69,12 +71,14 @@ namespace WpfApplication1
         }
         public void bumpMinor()
         {
+            toArray();
             version[2] += 1;
             version[3] = 0;
             verString = toString();
         }
         public void bumpTrivial()
         {
+            toArray();
             version[3] += 1;
             verString = toString();
         }
