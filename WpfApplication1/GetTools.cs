@@ -372,6 +372,34 @@ namespace WpfApplication1
                 file.WriteLine(filename);
             }
         }
+    static public bool findOtherDep(List<string> dir, string selected)
+        {
+            List<string> dirs = dir;
+            Version ver = getjsonVersion(selected);
+            string tempstr;
+            string pattern = "[:][' ']\"[^\"]+\"";
+            foreach (string location in dirs)
+            {
+                int last = selected.LastIndexOf('\\');
+                tempstr = selected.Substring(last+1);
+                try
+                {
+                    string[] temp = File.ReadAllLines(location + "\\manifest.json");
+                    for (int i = 0; i < temp.Count() - 1; i++)
+                    {
+                        if (temp[i].Contains(tempstr))
+                        {
+                            temp[i + 1] = Regex.Replace(temp[i+1], pattern, ": \"" + ver.getVersion() + '"');
+                        }
+                    }
+                    File.WriteAllLines(location + "\\manifest.json", temp);
+                }
+                catch (FileNotFoundException e) { Console.WriteLine(e); }
+
+            }
+
+            return true;
+        }
     }
 
 }

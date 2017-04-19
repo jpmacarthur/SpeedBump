@@ -37,6 +37,7 @@ namespace WpfApplication1
             if (GetTools.lastdirect() != "")
             {
                 List<string> temp = GetTools.GetDirectories(GetTools.lastdirect());
+                selected = GetTools.lastdirect();
                 myproj.Clear();
                 foreach (string thing in temp)
                 {
@@ -116,8 +117,8 @@ namespace WpfApplication1
         }
         private void allkidsBump(object sender, RoutedEventArgs e)
         {
-            string test = (Projects.SelectedItem as User).Name;
-            help2 = GetTools.getAllChildrenVersions(test);
+            List<string> test = GetTools.GetDirectories(selected);
+            bool find = GetTools.findOtherDep(test, (Projects.SelectedItem as User).Name);
             bool verif;
             verif = GetTools.verify((Projects.SelectedItem as User).Name);
 
@@ -140,8 +141,13 @@ namespace WpfApplication1
             help.toArray();
             help.bumpTrivial();
             help.toString();
+            List<string> test = GetTools.GetDirectories(selected);
+
             help2 = GetTools.bumpChildrenTrivial((Projects.SelectedItem as User).Name);
+            GetTools.writejsonVersion(help);
             GetTools.writechildVersion(help2);
+            GetTools.findOtherDep(test, (Projects.SelectedItem as User).Name);
+            GetTools.verify((Projects.SelectedItem as User).Name);
 
 
         }
