@@ -5,11 +5,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApplication1"
+        xmlns:src="clr-namespace:WpfApplication1"
         mc:Ignorable="d"
         Title="MainWindow" Height="550" Width="725">
-
+    <Window.Resources>
+        <ObjectDataProvider x:Key="FindCriteria" ObjectType="{x:Type src:TestOptions}" />
+        <src:RadioButtonCheckedConverter x:Key="RadioButtonCheckedConverter" />
+    </Window.Resources>
     <Grid>
-
+          
         <ListBox Name="Projects" DisplayMemberPath="Name" Margin="10,10,299,332.5"></ListBox>
         <StackPanel DockPanel.Dock="Right" Margin="481,10,7,199.5">
             <Button Name="btngetDirec" Click="btngetDirec_Click" Height="22" Margin="128,0,0,0">Directory</Button>
@@ -20,8 +24,38 @@
 
 
                 <Button Name="btnTest" Click="btnTest_Click">Get Dependencies</Button>
+                <Separator Opacity="0" Height="10"></Separator>
                 <Button Name="btnTest2" Click="btnTest2_Click">Get Children</Button>
+                <Separator Opacity="0" Height="10"></Separator>
                 <TextBlock Text="Version"></TextBlock>
+                <Separator Opacity="0" Height="10"></Separator>
+                <TextBlock Text="Bump Type"></TextBlock>
+                <RadioButton GroupName="EnumGroup" Grid.Row="1" Margin="0,5" 
+                            IsChecked="{Binding EnumProperty, Converter={StaticResource RadioButtonCheckedConverter}, 
+                            ConverterParameter={x:Static src:TestEnum.Option1}}">
+                    <TextBlock TextWrapping="Wrap" Text="Trivial" />
+                </RadioButton>
+
+                <RadioButton GroupName="EnumGroup" Grid.Row="2" Margin="0,5" 
+                            IsChecked="{Binding EnumProperty, Converter={StaticResource RadioButtonCheckedConverter}, 
+                            ConverterParameter={x:Static src:TestEnum.Option2}}">
+                    <TextBlock TextWrapping="Wrap" Text="Minor"/>
+                </RadioButton>
+
+                <RadioButton GroupName="EnumGroup" Grid.Row="3" Margin="0,5" 
+                            IsChecked="{Binding EnumProperty, Converter={StaticResource RadioButtonCheckedConverter}, 
+                            ConverterParameter={x:Static src:TestEnum.Option3}}">
+                    <TextBlock TextWrapping="Wrap" Text="Major"/>
+                </RadioButton>
+
+                    <RadioButton GroupName="EnumGroup" Grid.Row="4" Margin="0,5" 
+                            IsChecked="{Binding EnumProperty, Converter={StaticResource RadioButtonCheckedConverter}, 
+                            ConverterParameter={x:Static src:TestEnum.Option4}}">
+                        <TextBlock TextWrapping="Wrap" Text="Rewrite"/>
+                    </RadioButton>
+
+
+                <Button Grid.Row="2" Content="Test Binding" HorizontalAlignment="Right" Height="27" VerticalAlignment="Bottom" Width="100" Click="Button_Click"/>
                 <Label Loaded="verdisp"></Label>
             </StackPanel>
             <StackPanel DockPanel.Dock="Bottom" Margin="10,120,-0.5,0.5" Height="47" Orientation="Horizontal" >
@@ -40,4 +74,6 @@
         </DockPanel>
 
     </Grid>
+
 </Window>
+

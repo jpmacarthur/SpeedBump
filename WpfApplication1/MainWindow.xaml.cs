@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 using Ookii.Dialogs.Wpf;
+using System.Globalization;
 
 namespace WpfApplication1
 {
@@ -31,9 +32,15 @@ namespace WpfApplication1
         string file_selected;
         Version help;
         Dictionary<string, string> help2;
+
+        private TestOptions options = null;
         public MainWindow()
         {
             InitializeComponent();
+            this.options = new TestOptions();
+            this.options.BooleanProperty = true;
+            this.options.EnumProperty = TestEnum.Option1;
+            this.DataContext = this.options;
             if (GetTools.lastdirect() != "")
             {
                 List<string> temp = GetTools.GetDirectories(GetTools.lastdirect());
@@ -52,18 +59,18 @@ namespace WpfApplication1
         private void btnTest_Click(object sender, RoutedEventArgs e)
         {
             List<string> tester = new List<string>();
-            
+
             {
-                try { file_selected =(Projects.SelectedItem as User).Name; }
-                catch( NullReferenceException wee)
+                try { file_selected = (Projects.SelectedItem as User).Name; }
+                catch (NullReferenceException wee)
                 {
-                    
+
                     Console.WriteLine(wee);
                 }
-                
+
             }
             //file_selected = (Projects.SelectedItem as User).Name;
-             tester = GetTools.GetDependencies(file_selected);
+            tester = GetTools.GetDependencies(file_selected);
             users.Clear();
             foreach (string thing in tester)
             {
@@ -75,7 +82,7 @@ namespace WpfApplication1
         private void btnTest2_Click(object sender, RoutedEventArgs e)
         {
             List<string> tester = new List<string>();
-            try { tester = GetTools.GetChildren((Projects.SelectedItem as User).Name); } catch(NullReferenceException help) { Console.WriteLine(help); }
+            try { tester = GetTools.GetChildren((Projects.SelectedItem as User).Name); } catch (NullReferenceException help) { Console.WriteLine(help); }
             users.Clear();
             foreach (string thing in tester)
             {
@@ -87,12 +94,12 @@ namespace WpfApplication1
         private void btngetDirec_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new VistaFolderBrowserDialog();
-            
-                dialog.ShowDialog();
-           
-                selected = dialog.SelectedPath;
-            
-                
+
+            dialog.ShowDialog();
+
+            selected = dialog.SelectedPath;
+
+
             List<string> temp = GetTools.GetDirectories(selected);
             myproj.Clear();
             foreach (string thing in temp)
@@ -102,8 +109,8 @@ namespace WpfApplication1
             }
             GetTools.writeDirec(selected);
             Console.WriteLine(selected);
-                            
-            
+
+
         }
         private void depverBump(object sender, RoutedEventArgs e)
         {
@@ -112,8 +119,8 @@ namespace WpfApplication1
             help.toArray();
             help.bumpMajor();
             help.toString();
-            
-            
+
+
         }
         private void allkidsBump(object sender, RoutedEventArgs e)
         {
@@ -133,22 +140,28 @@ namespace WpfApplication1
             help.toString();
             GetTools.writejsonVersion(help);
 
-
+           
         }
         private void bmptestBump(object sender, RoutedEventArgs e)
         {
             help = GetTools.getjsonVersion((Projects.SelectedItem as User).Name);
+
+            int choice = (int)options.EnumProperty;
+            if (choice == 0) { System.Windows.MessageBox.Show("Trivial Bump"); }
+            else if (choice == 1) { System.Windows.MessageBox.Show("Minor Bump"); }
+            else if (choice == 2) { System.Windows.MessageBox.Show("Major Bump"); }
+            else if (choice == 3) { System.Windows.MessageBox.Show("Rewrite Bump"); }
             help.toArray();
             help.bumpTrivial();
             help.toString();
-            List<string> test = GetTools.GetDirectories(selected);
+                List<string> test = GetTools.GetDirectories(selected);
 
-            help2 = GetTools.bumpChildrenTrivial((Projects.SelectedItem as User).Name);
-            GetTools.writejsonVersion(help);
-            GetTools.writechildVersion(help2);
-            GetTools.findOtherDep(test, (Projects.SelectedItem as User).Name);
+            try { help2 = GetTools.bumpChildrenTrivial((Projects.SelectedItem as User).Name); } catch (System.IO.DirectoryNotFoundException) { Console.WriteLine(); }
+                GetTools.writejsonVersion(help);
+                GetTools.writechildVersion(help2);
+                GetTools.findOtherDep(test, (Projects.SelectedItem as User).Name);
+            //}
             GetTools.verify((Projects.SelectedItem as User).Name);
-
 
         }
         private void verdisp(object sender, RoutedEventArgs e)
@@ -161,8 +174,8 @@ namespace WpfApplication1
             }
 
             var label = sender as System.Windows.Controls.Label;
-                // ... Set date in content.
-                label.Content = temp.Name;
+            // ... Set date in content.
+            label.Content = temp.Name;
         }
         public class User : INotifyPropertyChanged
         {
@@ -188,7 +201,47 @@ namespace WpfApplication1
                     this.PropertyChanged(this, new PropertyChangedEventArgs(propName));
             }
         }
-        public partial class EntitiesView : System.Windows.Controls.UserControl, INotifyPropertyChanged
+        public enum RadioButtons { RadioButton1, RadioButton2, RadioButton3, RadioButton4, None }
+        public RadioButtons SelectedRadioButton { get; set; }
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            int choice = (int)options.EnumProperty;
+            if (choice == 0) { System.Windows.MessageBox.Show("Trivial Bump"); }
+            else if (choice == 1) { System.Windows.MessageBox.Show("Minor Bump"); }
+            else if (choice == 2) { System.Windows.MessageBox.Show("Major Bump"); }
+            else if (choice == 3) { System.Windows.MessageBox.Show("Rewrite Bump"); }
+        }
+
+    }
+    public enum TestEnum
+    {
+        Option1,
+        Option2,
+        Option3,
+        Option4
+    }
+
+    public class TestOptions
+    {
+        public TestEnum EnumProperty { get; set; }
+        public bool BooleanProperty { get; set; }
+    }
+    public class RadioButtonCheckedConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter,
+            System.Globalization.CultureInfo culture)
+        {
+            return value.Equals(parameter);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter,
+            System.Globalization.CultureInfo culture)
+        {
+            return value.Equals(true) ? parameter : System.Windows.Data.Binding.DoNothing;
+        }
+    }
+
+    public partial class EntitiesView : System.Windows.Controls.UserControl, INotifyPropertyChanged
         {
             private string _name2;
             public string Name2
@@ -217,5 +270,6 @@ namespace WpfApplication1
                 }
             }
         }
-    }
 }
+
+
