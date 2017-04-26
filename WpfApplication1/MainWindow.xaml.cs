@@ -18,7 +18,7 @@ using System.Windows.Forms.Integration;
 using Ookii.Dialogs.Wpf;
 using System.Globalization;
 
-namespace WpfApplication1
+namespace SpeedBump
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -32,19 +32,23 @@ namespace WpfApplication1
         string file_selected;
         Version help;
         Dictionary<string, string> help2;
+        SomeObjectClass obj = new SomeObjectClass();
+        private GetTools getTools = new GetTools();
+        private myFile json = new myFile();
 
         private TestOptions options = null;
         public MainWindow()
         {
             InitializeComponent();
+            txtName.DataContext = obj;
             this.options = new TestOptions();
             this.options.BooleanProperty = true;
             this.options.EnumProperty = TestEnum.Option1;
             this.DataContext = this.options;
-            if (GetTools.lastdirect() != "")
+            if (getTools.lastdirect() != "")
             {
-                List<string> temp = GetTools.GetDirectories(GetTools.lastdirect());
-                selected = GetTools.lastdirect();
+                List<string> temp = getTools.GetDirectories(getTools.lastdirect());
+                selected = getTools.lastdirect();
                 myproj.Clear();
                 foreach (string thing in temp)
                 {
@@ -54,6 +58,9 @@ namespace WpfApplication1
             }
             lbUsers.ItemsSource = users;
             Projects.ItemsSource = myproj;
+
+
+
 
         }
         private void btnTest_Click(object sender, RoutedEventArgs e)
@@ -70,7 +77,7 @@ namespace WpfApplication1
 
             }
             //file_selected = (Projects.SelectedItem as User).Name;
-            tester = GetTools.GetDependencies(file_selected);
+            tester = getTools.GetDependencies(file_selected);
             users.Clear();
             foreach (string thing in tester)
             {
@@ -79,10 +86,18 @@ namespace WpfApplication1
             }
 
         }
+        private void Projects_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var myitem = (e.OriginalSource as FrameworkElement).DataContext as User;
+            json = getTools.openJSON(myitem.Name);
+            Version welp = getTools.getjsonVersion(json);
+            obj.Name = welp.getVersion();
+        }
+
         private void btnTest2_Click(object sender, RoutedEventArgs e)
         {
             List<string> tester = new List<string>();
-            try { tester = GetTools.GetChildren((Projects.SelectedItem as User).Name); } catch (NullReferenceException help) { Console.WriteLine(help); }
+            try { tester = getTools.GetChildren((Projects.SelectedItem as User).Name); } catch (NullReferenceException help) { Console.WriteLine(help); }
             users.Clear();
             foreach (string thing in tester)
             {
@@ -100,51 +115,54 @@ namespace WpfApplication1
             selected = dialog.SelectedPath;
 
 
-            List<string> temp = GetTools.GetDirectories(selected);
+            List<string> temp = getTools.GetDirectories(selected);
             myproj.Clear();
             foreach (string thing in temp)
             {
                 myproj.Add(new User() { Name = thing });
                 Console.WriteLine(thing);
             }
-            GetTools.writeDirec(selected);
+            getTools.writeDirec(selected);
             Console.WriteLine(selected);
 
 
         }
         private void depverBump(object sender, RoutedEventArgs e)
         {
-            string test = (Projects.SelectedItem as User).Name + "\\" + (lbUsers.SelectedItem as User).Name;
-            help = GetTools.getchildVersion(test);
-            help.toArray();
-            help.bumpMajor();
-            help.toString();
+
+            //Version welp = getTools.getjsonVersion((Projects.SelectedItem as User).Name);
+            //obj.Name = welp.getVersion();
 
 
         }
         private void allkidsBump(object sender, RoutedEventArgs e)
         {
-            List<string> test = GetTools.GetDirectories(selected);
-            bool find = GetTools.findOtherDep(test, (Projects.SelectedItem as User).Name);
-            bool verif;
-            verif = GetTools.verify((Projects.SelectedItem as User).Name);
+            json = getTools.openJSON((Projects.SelectedItem as User).Name);
+            help = getTools.getjsonVersion(json);
+            help.bumpTrivial();
 
+            obj.Name = help.getVersion();
 
 
         }
         private void jsonverBump(object sender, RoutedEventArgs e)
         {
-            help = GetTools.getjsonVersion((Projects.SelectedItem as User).Name);
-            help.toArray();
-            help.bumpMajor();
-            help.toString();
-            GetTools.writejsonVersion(help);
+            json = getTools.openJSON((Projects.SelectedItem as User).Name);
+            help = getTools.getjsonVersion(json);
+
+            bool matches;
+            try {
+                matches = (getTools.verify(json));
+                System.Windows.MessageBox.Show("Everything went okay", "Verify");
+            }
+            catch (Exception MismatchedVersion) { System.Windows.MessageBox.Show("There was an error", "Error"); }
 
            
         }
         private void bmptestBump(object sender, RoutedEventArgs e)
         {
-            help = GetTools.getjsonVersion((Projects.SelectedItem as User).Name);
+            json = getTools.openJSON((Projects.SelectedItem as User).Name);
+            help = getTools.getjsonVersion(json);
 
             int choice = (int)options.EnumProperty;
             if (choice == 0) { System.Windows.MessageBox.Show("Trivial Bump"); }
@@ -154,14 +172,14 @@ namespace WpfApplication1
             help.toArray();
             help.bumpTrivial();
             help.toString();
-                List<string> test = GetTools.GetDirectories(selected);
+                List<string> test = getTools.GetDirectories(selected);
 
-            try { help2 = GetTools.bumpChildrenTrivial((Projects.SelectedItem as User).Name); } catch (System.IO.DirectoryNotFoundException) { Console.WriteLine(); }
-                GetTools.writejsonVersion(help);
-                GetTools.writechildVersion(help2);
-                GetTools.findOtherDep(test, (Projects.SelectedItem as User).Name);
+            try { help2 = getTools.bumpChildrenTrivial((Projects.SelectedItem as User).Name); } catch (System.IO.DirectoryNotFoundException) { Console.WriteLine(); }
+                getTools.writejsonVersion(help);
+                getTools.writechildVersion(help2);
+               // getTools.findOtherDep(test, (Projects.SelectedItem as User).Name);
             //}
-            GetTools.verify((Projects.SelectedItem as User).Name);
+           // getTools.verify((Projects.SelectedItem as User).Name);
 
         }
         private void verdisp(object sender, RoutedEventArgs e)
@@ -212,6 +230,22 @@ namespace WpfApplication1
             else if (choice == 3) { System.Windows.MessageBox.Show("Rewrite Bump"); }
         }
 
+        private void refresh_Click(object sender, RoutedEventArgs e)
+        {
+            List<string> temp = getTools.GetDirectories(getTools.lastdirect());
+            selected = getTools.lastdirect();
+            myproj.Clear();
+            foreach (string thing in temp)
+            {
+                myproj.Add(new User() { Name = thing });
+                Console.WriteLine(thing);
+            }
+        }
+
+        private void Projects_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
     public enum TestEnum
     {
@@ -240,7 +274,30 @@ namespace WpfApplication1
             return value.Equals(true) ? parameter : System.Windows.Data.Binding.DoNothing;
         }
     }
+    class SomeObjectClass : INotifyPropertyChanged
+    {
+        private string _name;
+        public string Name
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                _name = value;
+                OnPropertyChanged("Name");
+            }
+        }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void OnPropertyChanged(string PropertyName)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(PropertyName));
+        }
+    }
     public partial class EntitiesView : System.Windows.Controls.UserControl, INotifyPropertyChanged
         {
             private string _name2;

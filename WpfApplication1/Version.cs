@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace WpfApplication1
+namespace SpeedBump
 {
-    class Version
+    public class Version
     {
         private string type;
         private string name;

@@ -5,11 +5,12 @@ using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace WpfApplication1
+namespace SpeedBump
 {
-    class GetTools
+    public class GetTools
     {
-        static public string getFileEnd(string filename) {
+        public string getSLNFile(string filename)
+        {
             int last;
             string newfile = null;
             try
@@ -17,62 +18,83 @@ namespace WpfApplication1
                 last = filename.LastIndexOf("\\");
                 newfile = filename + filename.Substring(last) + ".sln";
             }
-            catch(NullReferenceException help)
+            catch (NullReferenceException help)
             {
                 Console.WriteLine(help);
-                
+
             }
             return newfile;
         }
 
-        static public Version getjsonVersion(string filename)
+        public Version getjsonVersion(myFile json)
         {
-            
+
             Version ver = new Version();
             int count = 0;
-            ver.setType("Parent");
+            ver.setName(json.getFilename());
+
             string temp = "";
             string pattern = "[:][' ']\"[^\"]+\"";
-            foreach (string line in File.ReadLines(filename + "\\manifest.json", Encoding.UTF8))
+            foreach (string line in json.getData())
             {
-                
-                if (line.Contains("version") && count <2)
+
+                if (line.Contains("version") && count < 2)
                 {
                     ver = new Version();
+                    ver.setType("Parent");
                     var match = Regex.Match(line, pattern);
-                    temp =(match.Value);
+                    temp = (match.Value);
                     temp = temp.Substring(3);
                     temp = temp.TrimEnd('\"');
                     ver.setVersion(temp);
-                    ver.setName(filename);
                     return ver;
-                    
+
                 }
                 else count++;
             }
-
-
             return ver;
         }
-        static public Version getchildVersion(string filename)
+
+
+
+
+
+        public myFile openJSON(string filename)
+        {
+            myFile json = new myFile();
+            json.setFilename(filename);
+            try
+            {
+                foreach (string line in File.ReadLines(filename + "\\manifest.json", Encoding.UTF8))
+                {
+                    json.add(line);
+                }
+            }
+            catch (System.IO.FileNotFoundException) { Console.WriteLine(); }
+
+
+            return json;
+        }
+        public Version getchildVersion(myFile file)
         {
             Version ver = new Version();
-            ver.setType("Child");
+
             string temp = "";
             string pattern = "\"[^\"]+\"";
-            foreach (string line in File.ReadLines(filename + "\\properties\\AssemblyInfo.cs", Encoding.UTF8))
+            foreach (string line in file.getData())
             {
 
                 if (line.Contains("[assembly: AssemblyVersion(") && !line.Contains("//"))
                 {
                     ver = new Version();
-                    ver.setName(filename);
+                    ver.setType("Child");
+                    ver.setName(file.getFilename());
                     var match = Regex.Match(line, pattern);
                     temp = (match.Value);
                     temp = temp.Substring(1);
                     temp = temp.TrimEnd('\"');
                     ver.setVersion(temp);
-                    
+
                     return ver;
 
                 }
@@ -81,23 +103,26 @@ namespace WpfApplication1
 
             return ver;
         }
-        static public List<string> GetDependencies(string filename)
+        public myFile openAssemblyInfo(string filename)
+        {
+            myFile info = new myFile();
+            info.setFilename(filename);
+            string path = filename + "\\properties\\AssemblyInfo.cs";
+            if (File.Exists(path))
+            {
+                foreach (string line in File.ReadLines(filename + "\\properties\\AssemblyInfo.cs", Encoding.UTF8))
+                { info.add(line); }
+            }
+            return info;
+        }
+        public List<string> GetDependencies(string filename)
         {
             List<string> depen = new List<string>();
             List<string> depen2 = new List<string>();
-            string newfile = getFileEnd(filename);
+            string newfile = getSLNFile(filename);
             int first;
             int last;
             string holder;
-            /*StreamReader streamReader = new StreamReader(filename);
-            string line;
-            while ((line = streamReader.ReadLine()) != null)
-            {
-                if (line.Contains("\"..\\"))
-                {
-                    depen.Add(line);
-                }
-            }*/
             try
             {
                 foreach (string line in File.ReadLines(newfile, Encoding.UTF8))
@@ -129,9 +154,9 @@ namespace WpfApplication1
             }
             return depen2;
         }
-        static public List<string> GetChildrenPath(string filename)
+        public List<string> GetChildrenPath(string filename)
         {
-            string newfile = getFileEnd(filename);
+            string newfile = getSLNFile(filename);
             List<string> depen = new List<string>();
             try
             {
@@ -142,7 +167,7 @@ namespace WpfApplication1
                         depen.Add(line);
                     }
                 }
-      
+
             }
             catch (Exception ex)
             {
@@ -153,9 +178,9 @@ namespace WpfApplication1
             }
             return depen;
         }
-        static public List<string> GetChildren(string filename)
+        public List<string> GetChildren(string filename)
         {
-            string newfile = getFileEnd(filename);
+            string newfile = getSLNFile(filename);
             List<string> depen = new List<string>();
             List<string> depen2 = new List<string>();
             int first;
@@ -192,7 +217,7 @@ namespace WpfApplication1
             }
             return depen2;
         }
-        static public List<string> GetDirectories(string filename)
+        public List<string> GetDirectories(string filename)
         {
             string[] dirs;
             List<string> temp = new List<string>();
@@ -204,70 +229,79 @@ namespace WpfApplication1
                     temp.Add(dirt);
                 }
             }
-            catch(ArgumentException e)
+            catch (ArgumentException e)
             {
                 Console.WriteLine(e);
             }
-            
-            /*foreach(string dirt in dirs)
-            {
-                temp.Add(dirt);
-            }*/
-
 
             return temp;
 
 
         }
-        static public bool verify(string filename) {
+        public bool verify(myFile json)
+        {
             bool matches = true;
-            Version json = getjsonVersion(filename);
-            Exception MismatchedVersion = new Exception();
-            Dictionary<string, string> kids = getAllChildrenVersions(filename);
+            Version jsonversion = getjsonVersion(json);
+            Dictionary<string, string> kids = getAllChildrenVersions(json.getFilename());
 
-            foreach(KeyValuePair<string, string> entry in kids)
+            foreach (KeyValuePair<string, string> entry in kids)
             {
-                if (entry.Value != json.getVersion()) throw MismatchedVersion; matches = false;
+                if (entry.Value != jsonversion.getVersion())
+                {
+                    matches = false;
+                    Exception MismatchedVersion = new Exception(); throw MismatchedVersion;
+                }
             }
 
             return matches;
         }
-    
-    static public Dictionary<string, string> getAllChildrenVersions(string filename)
-    {
+
+        public Dictionary<string, string> getAllChildrenVersions(string filename)
+        {
+            Dictionary<string, string> kids = new Dictionary<string, string>();
+            List<string> filesdirec = GetDirectories(filename);
+            myFile file = new myFile();
+            foreach (string child in filesdirec)
+            {
+                file = openAssemblyInfo(child);
+                {
+                    if (file.getCount() != 0)
+                    {
+                        Version little = getchildVersion(file);
+                        kids.Add(little.getName(), little.getVersion());
+                    }
+                }
+
+            }
+
+            return kids;
+        }
+
+        public Dictionary<string, string> bumpChildrenTrivial(string filename)
+        {
             Dictionary<string, string> kids = new Dictionary<string, string>();
             List<string> files = GetDirectories(filename);
-            foreach(string child in files)
+            myFile file = new myFile();
+            foreach (string child in files)
             {
-                Version little = getchildVersion(child);
+                file = openAssemblyInfo(child);
+                Version little = getchildVersion(file);
+                little.bumpTrivial();
                 kids.Add(little.getName(), little.getVersion());
 
             }
 
-        return kids;
-    }
-
-    static public Dictionary<string, string> bumpChildrenTrivial(string filename)
-    {
-        Dictionary<string, string> kids = new Dictionary<string, string>();
-        List<string> files = GetDirectories(filename);
-        foreach (string child in files)
-        {
-            Version little = getchildVersion(child);
-            little.bumpTrivial();
-            kids.Add(little.getName(), little.getVersion());
-
+            return kids;
         }
-
-        return kids;
-    }
-     static public Dictionary<string, string> bumpChildrenMinor(string filename)
+        public Dictionary<string, string> bumpChildrenMinor(string filename)
         {
             Dictionary<string, string> kids = new Dictionary<string, string>();
             List<string> files = GetDirectories(filename);
+            myFile file = new myFile();
             foreach (string child in files)
             {
-                Version little = getchildVersion(child);
+                file = openAssemblyInfo(child);
+                Version little = getchildVersion(file);
                 little.bumpMinor();
                 kids.Add(little.getName(), little.getVersion());
 
@@ -275,13 +309,15 @@ namespace WpfApplication1
 
             return kids;
         }
-     static public Dictionary<string, string> bumpChildrenMajor(string filename)
+        public Dictionary<string, string> bumpChildrenMajor(string filename)
         {
             Dictionary<string, string> kids = new Dictionary<string, string>();
+            myFile file = new myFile();
             List<string> files = GetDirectories(filename);
             foreach (string child in files)
             {
-                Version little = getchildVersion(child);
+                file = openAssemblyInfo(child);
+                Version little = getchildVersion(file);
                 little.bumpMajor();
                 kids.Add(little.getName(), little.getVersion());
 
@@ -289,13 +325,15 @@ namespace WpfApplication1
 
             return kids;
         }
-     static public Dictionary<string, string> bumpChildrenRewrite(string filename)
+        public Dictionary<string, string> bumpChildrenRewrite(string filename)
         {
             Dictionary<string, string> kids = new Dictionary<string, string>();
             List<string> files = GetDirectories(filename);
+            myFile file = new myFile();
             foreach (string child in files)
             {
-                Version little = getchildVersion(child);
+                file = openAssemblyInfo(child);
+                Version little = getchildVersion(file);
                 little.bumpRewrite();
                 kids.Add(little.getName(), little.getVersion());
 
@@ -303,7 +341,7 @@ namespace WpfApplication1
 
             return kids;
         }
-      static public bool writechildVersion(Dictionary<string, string> files)
+        public bool writechildVersion(Dictionary<string, string> files)
         {
             bool worked = false;
             string pattern = "\"[^\"]+\"";
@@ -314,74 +352,76 @@ namespace WpfApplication1
                 foreach (string thing in temp)
                 {
                     if (thing.Contains("[assembly: AssemblyVersion(") && !thing.Contains("//"))
-                    {temp[count] = Regex.Replace(thing, pattern, '"' + pair.Value + '"');
-                    count = 0;
-                    break;
+                    {
+                        temp[count] = Regex.Replace(thing, pattern, '"' + pair.Value + '"');
+                        count = 0;
+                        break;
                     }
                     count++;
                 }
-                
+
                 File.WriteAllLines(pair.Key + "\\properties\\AssemblyInfo.cs", temp);
-                
+
             }
             return worked;
         }
-        static public bool writejsonVersion(Version file)
+        public bool writejsonVersion(Version file)
         {
             bool worked = false;
             string pattern = "[:][' ']\"[^\"]+\"";
             int count = 0;
             string[] temp = File.ReadAllLines(file.getName() + "\\manifest.json");
             foreach (string thing in temp)
+            {
+                if (thing.Contains("version") && count < 2)
                 {
-                    if (thing.Contains("version") && count < 2)
-                    {
-                        temp[count] = Regex.Replace(thing, pattern, ": \"" + file.getVersion() + '"');
+                    temp[count] = Regex.Replace(thing, pattern, ": \"" + file.getVersion() + '"');
                     worked = true;
-                        break;
-                    }
-                    count++;
+                    break;
                 }
-
-                File.WriteAllLines(file.getName() + "\\manifest.json", temp);
-            return worked;
+                count++;
             }
-           
-        static public string lastdirect()
+
+            File.WriteAllLines(file.getName() + "\\manifest.json", temp);
+            return worked;
+        }
+
+        public string lastdirect()
         {
             string temp = "";
             string location = "C:\\Users\\Pat\\Desktop\\location.txt";
 
 
-            if (File.Exists(location)){
-                using (StreamReader file = new StreamReader(location)) 
+            if (File.Exists(location))
+            {
+                using (StreamReader file = new StreamReader(location))
                 {
                     char[] badchar = { '\r', '\n' };
                     temp = file.ReadToEnd();
                     temp = temp.TrimEnd(badchar);
-                    return temp; }
+                    return temp;
+                }
             }
 
 
             return temp;
         }
-    static public void writeDirec(string filename)
+        public void writeDirec(string filename)
         {
             using (StreamWriter file = new StreamWriter("C:\\Users\\Pat\\Desktop\\location.txt"))
             {
                 file.WriteLine(filename);
             }
         }
-    static public bool findOtherDep(List<string> dir, string selected)
+        public bool findOtherDep(myFile json)
         {
-            List<string> dirs = dir;
-            Version ver = getjsonVersion(selected);
+            Version ver = getjsonVersion(json);
             string tempstr;
             string pattern = "[:][' ']\"[^\"]+\"";
-            foreach (string location in dirs)
+            foreach (string location in json.getData())
             {
-                int last = selected.LastIndexOf('\\');
-                tempstr = selected.Substring(last+1);
+                int last = json.getFilename().LastIndexOf('\\');
+                tempstr = json.getFilename().Substring(last + 1);
                 try
                 {
                     string[] temp = File.ReadAllLines(location + "\\manifest.json");
@@ -389,7 +429,7 @@ namespace WpfApplication1
                     {
                         if (temp[i].Contains(tempstr))
                         {
-                            temp[i + 1] = Regex.Replace(temp[i+1], pattern, ": \"" + ver.getVersion() + '"');
+                            temp[i + 1] = Regex.Replace(temp[i + 1], pattern, ": \"" + ver.getVersion() + '"');
                         }
                     }
                     File.WriteAllLines(location + "\\manifest.json", temp);
@@ -400,7 +440,22 @@ namespace WpfApplication1
 
             return true;
         }
-    }
+        public void backupFile(string filename)
+        {
+            Dictionary<string, string> file = getAllChildrenVersions(filename);
+            foreach (KeyValuePair<string, string> line in file)
+            {
+                StringBuilder str = new StringBuilder(line.Key);
+                str.Append(@"\properties\BackUp_");
+                str.Append(line.Value + @"\");
+                Directory.CreateDirectory(str.ToString());
+                File.Copy(line.Key + "\\properties\\AssemblyInfo.cs", str.ToString() + "\\AssemblyInfo.cs",true);
 
+
+
+            }
+        }
+
+    }
 }
 
