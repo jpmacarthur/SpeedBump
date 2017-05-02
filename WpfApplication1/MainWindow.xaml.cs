@@ -89,7 +89,8 @@ namespace SpeedBump
         private void Projects_MouseDown(object sender, MouseButtonEventArgs e)
         {
             var myitem = (e.OriginalSource as FrameworkElement).DataContext as User;
-            json = getTools.openJSON(myitem.Name);
+            try { json = getTools.openJSON(myitem.Name); }
+            catch (NullReferenceException) { }
             Version welp = getTools.getjsonVersion(json);
             obj.Name = welp.getVersion();
         }
@@ -224,10 +225,25 @@ namespace SpeedBump
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             int choice = (int)options.EnumProperty;
-            if (choice == 0) { System.Windows.MessageBox.Show("Trivial Bump"); }
-            else if (choice == 1) { System.Windows.MessageBox.Show("Minor Bump"); }
-            else if (choice == 2) { System.Windows.MessageBox.Show("Major Bump"); }
-            else if (choice == 3) { System.Windows.MessageBox.Show("Rewrite Bump"); }
+            json = getTools.openJSON((Projects.SelectedItem as User).Name);
+            help = getTools.getjsonVersion(json);
+            StringBuilder message = new StringBuilder(@"Are you sure you would like to bump ");
+            message.Append((Projects.SelectedItem as User).Name);
+            message.Append(" to version ");
+
+
+                 if (choice == 0) { help.bumpTrivial(); obj.Name = help.getVersion(); }
+                else if (choice == 1) { help.bumpMinor(); obj.Name = help.getVersion(); }
+                else if (choice == 2) { help.bumpMajor(); obj.Name = help.getVersion(); }
+                else if (choice == 3) { help.bumpRewrite(); obj.Name = help.getVersion(); }
+
+            message.Append(help.getVersion() + "?");
+            MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show(message.ToString(), "Bump Confirmation", System.Windows.MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.Yes)
+            {
+
+            }
+            else { help = getTools.getjsonVersion(json); obj.Name = help.getVersion(); }
         }
 
         private void refresh_Click(object sender, RoutedEventArgs e)
