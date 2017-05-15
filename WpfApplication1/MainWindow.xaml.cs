@@ -153,7 +153,7 @@ namespace SpeedBump
 
             bool matches;
             try {
-                matches = (getTools.verify(json));
+                matches = (getTools.verify(json, selected));
                 System.Windows.MessageBox.Show("Everything went okay", "Verify");
             }
             catch (Exception MismatchedVersion) { System.Windows.MessageBox.Show("There was an error", "Error"); }
@@ -178,7 +178,7 @@ namespace SpeedBump
             try { help2 = getTools.bumpChildrenTrivial((Projects.SelectedItem as User).Name); } catch (System.IO.DirectoryNotFoundException) { Console.WriteLine(); }
                 getTools.writejsonVersion(help);
                 getTools.writechildVersion(help2);
-               // getTools.findOtherDep(test, (Projects.SelectedItem as User).Name);
+                getTools.writeOtherDep(json, selected);
             //}
            // getTools.verify((Projects.SelectedItem as User).Name);
 
@@ -227,6 +227,7 @@ namespace SpeedBump
             int choice = (int)options.EnumProperty;
             json = getTools.openJSON((Projects.SelectedItem as User).Name);
             help = getTools.getjsonVersion(json);
+            List<string> direcs = getTools.GetDirectories(selected);
             StringBuilder message = new StringBuilder(@"Are you sure you would like to bump ");
             message.Append((Projects.SelectedItem as User).Name);
             message.Append(" to version ");

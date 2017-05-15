@@ -8,7 +8,7 @@ namespace SpeedBump
 {
     public class myFile
     {
-        private List<string> data = new List<string>();
+        public List<string> data = new List<string>();
         private string filename;
 
         public myFile(){
@@ -17,6 +17,10 @@ namespace SpeedBump
         public myFile(List<string> info)
         {
             data = info;
+        }
+        public myFile(string[] info)
+        {
+            List<string> data = new List<string>(info);
         }
         public void setData(List<string> info)
         {

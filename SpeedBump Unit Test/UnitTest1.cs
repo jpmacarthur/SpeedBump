@@ -59,13 +59,14 @@ namespace SpeedBump_Unit_Test
         public void TestVerify()
         {
             string filename = @"c:\My Projects\Task Scheduler";
+            string selected = @"c:\My Projects\";
             myFile json = getTools.openJSON(filename);
             bool worked = false;
-            try { worked = getTools.verify(json); Assert.IsTrue(worked); }
+            try { worked = getTools.verify(json, selected); Assert.IsTrue(worked); }
             catch(Exception MismatchedVersion) { Assert.IsFalse(worked); }
             filename = @"fasdfas";
             json.setFilename(filename);
-            try { worked = getTools.verify(json); Assert.IsTrue(worked); }
+            try { worked = getTools.verify(json, selected); Assert.IsTrue(worked); }
             catch (Exception MismatchedVersion) { Assert.IsFalse(worked); }
 
         }
@@ -88,7 +89,28 @@ namespace SpeedBump_Unit_Test
             Assert.IsTrue(File.Exists(@"C:\My Projects\TT Gateway\TT Gateway DLL\Properties\BackUp_1.0.0.3\AssemblyInfo.cs"));
             Assert.IsTrue(File.Exists(@"C:\My Projects\TT Gateway\TT Gateway Windows Service\Properties\BackUp_1.0.0.3\AssemblyInfo.cs"));
         }
+        [TestMethod]
+        public void TestwriteOtherDep()
+        {
+            myFile json = new myFile();
+            json.add("\"version\": \"1.0.0.3\",");
+            json.setFilename(@"C:\My Projects\TT Gateway");
+            getTools.writeOtherDep(json, @"C:\My Projects\");
+        }
+        [TestMethod]
+        public void TestgetChildVersion()
+        {
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            string path = @"c:\My Projects\TT Gateway";
+            getTools.getAllChildrenVersions(path);
+            Assert.IsNotNull(dic);
+            Assert.IsInstanceOfType(dic, typeof(Dictionary<string, string>));
+
+
+
+        }
     }
+    
 
     
 }

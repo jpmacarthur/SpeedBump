@@ -9,6 +9,11 @@ namespace SpeedBump
 {
     public class GetTools
     {
+        /// <summary>
+        /// Gets the sln file for any certain path
+        /// </summary>
+        /// <param name="filename">Path to folder containing .sln</param>
+        /// <returns>Returns path to .sln file</returns>
         public string getSLNFile(string filename)
         {
             int last;
@@ -25,7 +30,11 @@ namespace SpeedBump
             }
             return newfile;
         }
-
+        /// <summary>
+        /// Parses manifest.json file to get the version of it
+        /// </summary>
+        /// <param name="json">A myFile that contains the contents of a manifest.json file and the path to the file</param>
+        /// <returns>Returns a version object that contains the version and the name of the parent</returns>
         public Version getjsonVersion(myFile json)
         {
 
@@ -58,7 +67,11 @@ namespace SpeedBump
 
 
 
-
+        /// <summary>
+        /// Opens a json file and puts the contents into a myFile
+        /// </summary>
+        /// <param name="filename">A path that contains a manifest.json file</param>
+        /// <returns>Returns a myFile that contains the contents and the corresponding path</returns>
         public myFile openJSON(string filename)
         {
             myFile json = new myFile();
@@ -75,6 +88,11 @@ namespace SpeedBump
 
             return json;
         }
+        /// <summary>
+        /// Gets the version of a child by parsing the assembly info file
+        /// </summary>
+        /// <param name="file">A myFile of a child</param>
+        /// <returns>Returns a version object containing version number and name of the child</returns>
         public Version getchildVersion(myFile file)
         {
             Version ver = new Version();
@@ -103,6 +121,11 @@ namespace SpeedBump
 
             return ver;
         }
+        /// <summary>
+        /// Opens an assembly info file and puts it into a myFile
+        /// </summary>
+        /// <param name="filename">Path to a folder containing an assembly info file</param>
+        /// <returns>Returns a myFile with the contents of the assembly info file</returns>
         public myFile openAssemblyInfo(string filename)
         {
             myFile info = new myFile();
@@ -115,6 +138,11 @@ namespace SpeedBump
             }
             return info;
         }
+        /// <summary>
+        /// Gets the dependencies of a selected project
+        /// </summary>
+        /// <param name="filename">Path to a parent folder</param>
+        /// <returns>Returns a list containing the names of the dependencies</returns>
         public List<string> GetDependencies(string filename)
         {
             List<string> depen = new List<string>();
@@ -154,6 +182,11 @@ namespace SpeedBump
             }
             return depen2;
         }
+        /// <summary>
+        /// Reads a .sln file and gets the paths of the children
+        /// </summary>
+        /// <param name="filename">Path to a parent directory containing a .sln file</param>
+        /// <returns>Returns a list containing the children</returns>
         public List<string> GetChildrenPath(string filename)
         {
             string newfile = getSLNFile(filename);
@@ -178,6 +211,11 @@ namespace SpeedBump
             }
             return depen;
         }
+        /// <summary>
+        /// Gets the children of a parent file
+        /// </summary>
+        /// <param name="filename">Path to a parent directory containing a .sln file</param>
+        /// <returns>Returns a list containing the names of the child projects</returns>
         public List<string> GetChildren(string filename)
         {
             string newfile = getSLNFile(filename);
@@ -217,6 +255,11 @@ namespace SpeedBump
             }
             return depen2;
         }
+        /// <summary>
+        /// Gets all of the subdirectories for any directory
+        /// </summary>
+        /// <param name="filename">Path to main directory</param>
+        /// <returns>Returns a list containing the subdirectories inside the given directory</returns>
         public List<string> GetDirectories(string filename)
         {
             string[] dirs;
@@ -238,11 +281,18 @@ namespace SpeedBump
 
 
         }
-        public bool verify(myFile json)
+        /// <summary>
+        /// Verifies that all versions in the main directory match.
+        /// </summary>
+        /// <param name="json">Original file which contains a path and its version</param>
+        /// <param name="dir">The main directory</param>
+        /// <returns>Returns false and throws exception if not matching</returns>
+        public bool verify(myFile json, string dir)
         {
             bool matches = true;
             Version jsonversion = getjsonVersion(json);
             Dictionary<string, string> kids = getAllChildrenVersions(json.getFilename());
+            List<myFile> direcs = openAllJson(dir);
 
             foreach (KeyValuePair<string, string> entry in kids)
             {
@@ -253,9 +303,16 @@ namespace SpeedBump
                 }
             }
 
+            if (verifyAllJson(json, direcs) != true) { matches = false; Exception MismatchedVersion = new Exception(); throw MismatchedVersion;};
+
+
             return matches;
         }
-
+        /// <summary>
+        /// Takes a path and creates a dictionary containing the name of each child and the corresponding version of the child.
+        /// </summary>
+        /// <param name="filename">The path to the parent</param>
+        /// <returns></returns>
         public Dictionary<string, string> getAllChildrenVersions(string filename)
         {
             Dictionary<string, string> kids = new Dictionary<string, string>();
@@ -276,7 +333,11 @@ namespace SpeedBump
 
             return kids;
         }
-
+        /// <summary>
+        /// Bumps all of the children contained in a parent directory.  Does not write anything to file.
+        /// </summary>
+        /// <param name="filename">Path to the main directory</param>
+        /// <returns>Returns a dictionary containing the paths to the children and their corresponding bumped versions.</returns>
         public Dictionary<string, string> bumpChildrenTrivial(string filename)
         {
             Dictionary<string, string> kids = new Dictionary<string, string>();
@@ -293,6 +354,11 @@ namespace SpeedBump
 
             return kids;
         }
+        /// <summary>
+        /// Bumps all of the children contained in a parent directory.  Does not write anything to file.
+        /// </summary>
+        /// <param name="filename">Path to the main directory</param>
+        /// <returns>Returns a dictionary containing the paths to the children and their corresponding bumped versions.</returns>
         public Dictionary<string, string> bumpChildrenMinor(string filename)
         {
             Dictionary<string, string> kids = new Dictionary<string, string>();
@@ -309,6 +375,11 @@ namespace SpeedBump
 
             return kids;
         }
+        /// <summary>
+        /// Bumps all of the children contained in a parent directory.  Does not write anything to file.
+        /// </summary>
+        /// <param name="filename">Path to the main directory</param>
+        /// <returns>Returns a dictionary containing the paths to the children and their corresponding bumped versions.</returns>
         public Dictionary<string, string> bumpChildrenMajor(string filename)
         {
             Dictionary<string, string> kids = new Dictionary<string, string>();
@@ -325,6 +396,11 @@ namespace SpeedBump
 
             return kids;
         }
+        /// <summary>
+        /// Bumps all of the children contained in a parent directory.  Does not write anything to file.
+        /// </summary>
+        /// <param name="filename">Path to the main directory</param>
+        /// <returns>Returns a dictionary containing the paths to the children and their corresponding bumped versions.</returns>
         public Dictionary<string, string> bumpChildrenRewrite(string filename)
         {
             Dictionary<string, string> kids = new Dictionary<string, string>();
@@ -341,6 +417,11 @@ namespace SpeedBump
 
             return kids;
         }
+        /// <summary>
+        /// Writes the bumped assembly info files to each child
+        /// </summary>
+        /// <param name="files">A dictionary where the key is the path and the value is the version</param>
+        /// <returns>Returns true if the write worked, False if it did not</returns>
         public bool writechildVersion(Dictionary<string, string> files)
         {
             bool worked = false;
@@ -355,16 +436,22 @@ namespace SpeedBump
                     {
                         temp[count] = Regex.Replace(thing, pattern, '"' + pair.Value + '"');
                         count = 0;
+                        worked = true;
                         break;
                     }
                     count++;
                 }
 
-                File.WriteAllLines(pair.Key + "\\properties\\AssemblyInfo.cs", temp);
+                if (worked == true)File.WriteAllLines(pair.Key + "\\properties\\AssemblyInfo.cs", temp);
 
             }
             return worked;
         }
+        /// <summary>
+        /// Writes the manifest.json file with the version of the given object
+        /// </summary>
+        /// <param name="file">A version object to be written</param>
+        /// <returns>Returns True if the file was written to and False if it was not</returns>
         public bool writejsonVersion(Version file)
         {
             bool worked = false;
@@ -382,10 +469,13 @@ namespace SpeedBump
                 count++;
             }
 
-            File.WriteAllLines(file.getName() + "\\manifest.json", temp);
+            if (worked == true)File.WriteAllLines(file.getName() + "\\manifest.json", temp);
             return worked;
         }
-
+        /// <summary>
+        /// Gets the last used directory
+        /// </summary>
+        /// <returns>Returns the contents of a text file</returns>
         public string lastdirect()
         {
             string temp = "";
@@ -406,6 +496,10 @@ namespace SpeedBump
 
             return temp;
         }
+        /// <summary>
+        /// Writes a filename to the location.txt file
+        /// </summary>
+        /// <param name="filename">Path of the selected directory</param>
         public void writeDirec(string filename)
         {
             using (StreamWriter file = new StreamWriter("C:\\Users\\Pat\\Desktop\\location.txt"))
@@ -413,12 +507,19 @@ namespace SpeedBump
                 file.WriteLine(filename);
             }
         }
-        public bool findOtherDep(myFile json)
+        /// <summary>
+        /// Searches through other directories inside the main project and rewrites the manifest.json file with the updated version
+        /// </summary>
+        /// <param name="json">The main json file used to write the dependents</param>
+        /// <param name="dir">Directory of the main project</param>
+        /// <returns></returns>
+        public bool writeOtherDep(myFile json, string dir)
         {
             Version ver = getjsonVersion(json);
+            List<string> direcs = GetDirectories(dir);
             string tempstr;
             string pattern = "[:][' ']\"[^\"]+\"";
-            foreach (string location in json.getData())
+            foreach (string location in direcs)
             {
                 int last = json.getFilename().LastIndexOf('\\');
                 tempstr = json.getFilename().Substring(last + 1);
@@ -440,6 +541,55 @@ namespace SpeedBump
 
             return true;
         }
+        /// <summary>
+        /// Opens multiple json files
+        /// </summary>
+        /// <param name="dir">Main parent directory</param>
+        /// <returns>Returns a list contaning myFiles of each manifest.json file.</returns>
+        public List<myFile> openAllJson(string dir)
+        {
+            List<myFile> dic = new List<myFile>();
+            List<string> direcs = GetDirectories(dir);
+
+            foreach(string location in direcs)
+            {
+                string[] temp = File.ReadAllLines(location + "\\manifest.json");
+                myFile json = new myFile(temp);
+                json.setFilename(location);
+                dic.Add(json);
+            }
+
+
+
+            return dic;
+
+        }
+        /// <summary>
+        /// Takes an original file and compares the version of it against the rest of the files that have it as a dependency
+        /// </summary>
+        /// <param name="json"></param>
+        /// <param name="list"></param>
+        public bool verifyAllJson(myFile json, List<myFile> list)
+        {
+            bool exists = false;
+            string tempstr;
+            Version ver = getjsonVersion(json);
+            foreach (myFile item in list)
+            {
+                int last = item.getFilename().LastIndexOf('\\');
+                tempstr = item.getFilename().Substring(last + 1);
+                    for (int i = 0; i < item.data.Count - 1; i++)
+                    {
+                        if (item.data[i].Contains(tempstr) && item.data[i + 1].Contains(ver.getVersion()))
+                        { exists = true; }
+                    }
+ 
+            }     return exists;
+        }
+        /// <summary>
+        /// Backs up an assembly info file into a new folder
+        /// </summary>
+        /// <param name="filename">Project directory</param>
         public void backupFile(string filename)
         {
             Dictionary<string, string> file = getAllChildrenVersions(filename);
