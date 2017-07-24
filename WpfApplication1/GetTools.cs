@@ -336,7 +336,7 @@ namespace SpeedBump
         /// <summary>
         /// Bumps all of the children contained in a parent directory.  Does not write anything to file.
         /// </summary>
-        /// <param name="filename">Path to the main directory</param>
+        /// <param name="filename">Path to the parent directory</param>
         /// <returns>Returns a dictionary containing the paths to the children and their corresponding bumped versions.</returns>
         public Dictionary<string, string> bumpChildrenTrivial(string filename)
         {
@@ -567,8 +567,8 @@ namespace SpeedBump
         /// <summary>
         /// Takes an original file and compares the version of it against the rest of the files that have it as a dependency
         /// </summary>
-        /// <param name="json"></param>
-        /// <param name="list"></param>
+        /// <param name="json">Original File</param>
+        /// <param name="list">List of all directories to check against</param>
         public bool verifyAllJson(myFile json, List<myFile> list)
         {
             bool exists = false;
@@ -599,7 +599,7 @@ namespace SpeedBump
                 str.Append(@"\properties\BackUp_");
                 str.Append(line.Value + @"\");
                 Directory.CreateDirectory(str.ToString());
-                File.Copy(line.Key + "\\properties\\AssemblyInfo.cs", str.ToString() + "\\AssemblyInfo.cs",true);
+                File.Copy($"{line.Key}\\properties\\AssemblyInfo.cs", $"{str.ToString()}\\AssemblyInfo.cs",true);
 
 
 
